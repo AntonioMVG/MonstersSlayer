@@ -4,17 +4,14 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    /******************/
-    // Public variables
-    /******************/
+    #region Public variables
     public int speed;
     public int jumpForce;
     public int lives;
     //public Canvas canvas;
+    #endregion
 
-    /*******************/
-    // Private variables
-    /*******************/
+    #region Private variables
     private Rigidbody2D rb;
     private GameObject foot;
     private SpriteRenderer sprite;
@@ -23,6 +20,7 @@ public class PlayerController : MonoBehaviour
     private bool hasJumped;
     private float initialPosX;
     private float updatedPosX;
+    #endregion
 
     private void Start()
     {
@@ -31,11 +29,11 @@ public class PlayerController : MonoBehaviour
         foot = transform.Find("Foot").gameObject;
 
         // Get the sprite component of the child sprite object
-        sprite = gameObject.transform.Find("hero-idle-1").GetComponent<SpriteRenderer>();
+        sprite = gameObject.transform.Find("player-idle-1").GetComponent<SpriteRenderer>();
 
         initialPosX = transform.position.x;
         // Get the animator controller of the sprite child object
-        playerAnimation = gameObject.transform.Find("hero-idle-1").GetComponent<Animator>();
+        playerAnimation = gameObject.transform.Find("player-idle-1").GetComponent<Animator>();
     }
 
     private void FixedUpdate()
