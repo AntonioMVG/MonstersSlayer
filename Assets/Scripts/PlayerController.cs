@@ -8,7 +8,8 @@ public class PlayerController : MonoBehaviour
     public int speed;
     public int jumpForce;
     public int lives;
-    //public Canvas canvas;
+    public Canvas canvas;
+    [HideInInspector] public GameObject crouchPanel;
     #endregion
 
     #region Private variables
@@ -17,7 +18,10 @@ public class PlayerController : MonoBehaviour
     private SpriteRenderer sprite;
     private Animator playerAnimation;
     private GameManager gameManager;
+    private HUDController hud;
+    private CollectibleController colcnt;
     private bool hasJumped;
+    private bool sneaking;
     private float initialPosX;
     private float updatedPosX;
     #endregion
@@ -34,6 +38,11 @@ public class PlayerController : MonoBehaviour
         initialPosX = transform.position.x;
         // Get the animator controller of the sprite child object
         playerAnimation = gameObject.transform.Find("player-idle-1").GetComponent<Animator>();
+
+        // Get the HUD Controller
+        hud = canvas.GetComponent<HUDController>();
+        hud.SetLivesTxt(lives);
+        hud.SetCollectiblesTxt(GameObject.FindGameObjectsWithTag("Collectibles").Length);
     }
 
     private void FixedUpdate()
@@ -63,10 +72,29 @@ public class PlayerController : MonoBehaviour
             sprite.flipX = true;
         }
 
+        // If the player press S or KeyDown, the squirrel crouches
+        if((Input.GetKeyDown(KeyCode.S)) || (Input.GetKeyDown(KeyCode.DownArrow)))
+        {
+            sneaking = true;
+            crouchPanel.gameObject.SetActive(true);
+        }
+        else if ((Input.GetKeyUp(KeyCode.S)) || (Input.GetKeyUp(KeyCode.DownArrow)))
+        {
+            sneaking = false;
+            crouchPanel.gameObject.SetActive(false);
+        }
+
         // Player animations
         PlayerAnimate();
 
         // Count how many steps the character takes according to its direction
+        if ((Input.GetKeyUp(KeyCode.RightArrow)) || (Input.GetKeyUp(KeyCode.LeftArrow)))
+        {
+            updatedPosX = transform.position.x;
+            initialPosX = updatedPosX;
+        }
+
+        /*
         if (Input.GetKeyUp(KeyCode.RightArrow))
         {
             updatedPosX = transform.position.x;
@@ -76,7 +104,7 @@ public class PlayerController : MonoBehaviour
         {
             updatedPosX = transform.position.x;
             initialPosX = updatedPosX;
-        }
+        }*/
     }
 
     private bool TouchGround()
@@ -94,7 +122,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
     private void PlayerAnimate()
     {
         // Player Jumping
@@ -108,9 +135,16 @@ public class PlayerController : MonoBehaviour
             playerAnimation.Play("playerRun");
         }
         // Player Idle
-        else if (TouchGround() && Input.GetAxisRaw("Horizontal") == 0)
+        else if (TouchGround() && Input.GetAxisRaw("Horizontal") == 0 && !sneaking)
         {
+            sneaking = false;
             playerAnimation.Play("playerIdle");
+        }
+        // Player Crouch
+        else if (TouchGround() && Input.GetKeyDown(KeyCode.S))
+        {
+            sneaking = true;
+            playerAnimation.Play("playerCrouch");
         }
     }
 }
