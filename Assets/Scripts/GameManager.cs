@@ -6,6 +6,11 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
+    public GameObject controlsPanel;
+    
+    private int collectibles;
+    
+    public int Collectibles { get => collectibles; set => collectibles = value; }
 
     private void Awake()
     {
@@ -34,5 +39,15 @@ public class GameManager : MonoBehaviour
     public void ResumeGame()
     {
         Time.timeScale = 1;
+    }
+
+    public void ShowControls()
+    {
+        controlsPanel.gameObject.SetActive(true);
+    }
+
+    public void HideControls()
+    {
+        controlsPanel.gameObject.SetActive(false);
     }
 }

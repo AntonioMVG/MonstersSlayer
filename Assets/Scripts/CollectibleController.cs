@@ -17,17 +17,8 @@ public class CollectibleController : MonoBehaviour
         if (collision.gameObject.tag == "Ground")
         {
             col.constraints = RigidbodyConstraints2D.FreezePosition;
-        }
-    }
-
-    private void InfoCollectibles()
-    {
-        int collectiblesNum = GameObject.FindGameObjectsWithTag("Collectible").Length;
-        hud.SetCollectiblesTxt(collectiblesNum);
-
-        if (collectiblesNum == 0)
-        {
-            
+            // Placing the Acorn above the Ground
+            col.transform.position = new Vector2(col.transform.position.x, col.transform.position.y + 0.3f);
         }
     }
 }

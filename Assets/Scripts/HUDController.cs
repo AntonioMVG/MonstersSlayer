@@ -14,7 +14,7 @@ public class HUDController : MonoBehaviour
     {
         int mins = (int)levelTime / 60;
         int secs = (int)levelTime % 60;
-        timeTxt.text = mins.ToString("Time 00" + ":" + secs.ToString("00"));
+        timeTxt.text = mins.ToString("Time 00" + ":") + secs.ToString("00");
     }
 
     public void SetLivesTxt(int lives)
@@ -25,5 +25,23 @@ public class HUDController : MonoBehaviour
     public void SetCollectiblesTxt(int collectibles)
     {
         collectiblesTxt.text = "Acorns: " + collectibles.ToString();
+    }
+
+    public void SetTimesUpBox()
+    {
+        canvas.transform.Find("Panel").gameObject.SetActive(false);
+        canvas.transform.Find("TimesUpPanel").gameObject.SetActive(true);
+    }
+
+    public void SetWinBox()
+    {
+        canvas.transform.Find("WinBox").gameObject.SetActive(true);
+    }
+
+    public void SetLoseLivesBox()
+    {
+        canvas.transform.Find("Panel").gameObject.SetActive(false);
+        canvas.transform.Find("TimesUpPanel").gameObject.SetActive(false);
+        canvas.transform.Find("LoseLivesPanel").gameObject.SetActive(true);
     }
 }

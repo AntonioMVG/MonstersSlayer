@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -8,8 +9,8 @@ public class PlayerController : MonoBehaviour
     public int speed;
     public int jumpForce;
     public int lives;
+    public float levelTime; // In seconds
     public Canvas canvas;
-    [HideInInspector] public GameObject crouchPanel;
     #endregion
 
     #region Private variables
@@ -19,7 +20,7 @@ public class PlayerController : MonoBehaviour
     private Animator playerAnimation;
     private GameManager gameManager;
     private HUDController hud;
-    private CollectibleController colcnt;
+    private CollectibleController colController;
     private bool hasJumped;
     private bool sneaking;
     private float initialPosX;
@@ -31,11 +32,11 @@ public class PlayerController : MonoBehaviour
         GameManager.instance.ResumeGame();
         rb = GetComponent<Rigidbody2D>();
         foot = transform.Find("Foot").gameObject;
+        initialPosX = transform.position.x;
 
         // Get the sprite component of the child sprite object
         sprite = gameObject.transform.Find("player-idle-1").GetComponent<SpriteRenderer>();
-
-        initialPosX = transform.position.x;
+        
         // Get the animator controller of the sprite child object
         playerAnimation = gameObject.transform.Find("player-idle-1").GetComponent<Animator>();
 
@@ -52,6 +53,19 @@ public class PlayerController : MonoBehaviour
 
         // Apply physic velocity to the object with the move value * speed, the Y coordenate is the same
         rb.velocity = new Vector2(inputX * speed, rb.velocity.y);
+
+        // Calculate if the time is finnish
+        if (levelTime <= 0f)
+        {
+            //WinLevel(false);
+            GameManager.instance.PauseGame();
+            hud.SetTimesUpBox();
+        }
+        else
+        {
+            levelTime -= Time.deltaTime;
+            hud.SetTimeTxt((int)levelTime);
+        }
     }
 
     private void Update()
@@ -62,7 +76,7 @@ public class PlayerController : MonoBehaviour
             hasJumped = true;
         }
 
-        // Changing the sprite
+        // Changing the sprite orientation
         if (rb.velocity.x > 0)
         {
             sprite.flipX = false;
@@ -76,12 +90,10 @@ public class PlayerController : MonoBehaviour
         if((Input.GetKeyDown(KeyCode.S)) || (Input.GetKeyDown(KeyCode.DownArrow)))
         {
             sneaking = true;
-            crouchPanel.gameObject.SetActive(true);
         }
         else if ((Input.GetKeyUp(KeyCode.S)) || (Input.GetKeyUp(KeyCode.DownArrow)))
         {
             sneaking = false;
-            crouchPanel.gameObject.SetActive(false);
         }
 
         // Player animations
@@ -93,18 +105,6 @@ public class PlayerController : MonoBehaviour
             updatedPosX = transform.position.x;
             initialPosX = updatedPosX;
         }
-
-        /*
-        if (Input.GetKeyUp(KeyCode.RightArrow))
-        {
-            updatedPosX = transform.position.x;
-            initialPosX = updatedPosX;
-        }
-        else if (Input.GetKeyUp(KeyCode.LeftArrow))
-        {
-            updatedPosX = transform.position.x;
-            initialPosX = updatedPosX;
-        }*/
     }
 
     private bool TouchGround()
@@ -145,6 +145,27 @@ public class PlayerController : MonoBehaviour
         {
             sneaking = true;
             playerAnimation.Play("playerCrouch");
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "Collectibles")
+        {
+            Destroy(collision.gameObject);
+            Invoke(nameof(InfoCollectibles), 0.1f);
+            GameManager.instance.Collectibles -= 1;
+        }
+    }
+
+    private void InfoCollectibles()
+    {
+        int collectiblesNum = GameObject.FindGameObjectsWithTag("Collectibles").Length;
+        hud.SetCollectiblesTxt(collectiblesNum);
+
+        if (collectiblesNum == 0)
+        {
+
         }
     }
 }
