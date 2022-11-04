@@ -7,10 +7,13 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
     public GameObject controlsPanel;
+    public GameObject levelSelectorPanel;
     
     private int collectibles;
+    private int enemies;
     
     public int Collectibles { get => collectibles; set => collectibles = value; }
+    public int Enemies { get => enemies; set => enemies = value; }
 
     private void Awake()
     {
@@ -39,6 +42,16 @@ public class GameManager : MonoBehaviour
     public void ResumeGame()
     {
         Time.timeScale = 1;
+    }
+
+    public void ShowLevelSelector()
+    {
+        levelSelectorPanel.gameObject.SetActive(true);
+    }
+
+    public void HideLevelSelector()
+    {
+        levelSelectorPanel.gameObject.SetActive(false);
     }
 
     public void ShowControls()

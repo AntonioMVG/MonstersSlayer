@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -19,12 +18,18 @@ public class PlayerController : MonoBehaviour
     private SpriteRenderer sprite;
     private Animator playerAnimation;
     private GameManager gameManager;
+    private EnemyController enemyController;
     private HUDController hud;
     private CollectibleController colController;
     private bool hasJumped;
     private bool sneaking;
     private float initialPosX;
     private float updatedPosX;
+    private bool intoTheHell;
+
+    // New mechanic
+    private bool isRewinding;
+    List<Vector3> positions;
     #endregion
 
     private void Start()
@@ -44,6 +49,10 @@ public class PlayerController : MonoBehaviour
         hud = canvas.GetComponent<HUDController>();
         hud.SetLivesTxt(lives);
         hud.SetCollectiblesTxt(GameObject.FindGameObjectsWithTag("Collectibles").Length);
+        hud.SetEnemiesTxt(GameObject.FindGameObjectsWithTag("Enemies").Length);
+
+        // New mechanic
+        positions = new List<Vector3>();
     }
 
     private void FixedUpdate()
@@ -65,6 +74,16 @@ public class PlayerController : MonoBehaviour
         {
             levelTime -= Time.deltaTime;
             hud.SetTimeTxt((int)levelTime);
+        }
+
+        // New mechanic
+        if (isRewinding)
+        {
+            Rewind();
+        }
+        else
+        {
+            Record();
         }
     }
 
@@ -104,6 +123,16 @@ public class PlayerController : MonoBehaviour
         {
             updatedPosX = transform.position.x;
             initialPosX = updatedPosX;
+        }
+
+        // When Hell is activated and the F key has been pressed, the game goes back in time
+        if (intoTheHell == true && Input.GetKeyDown(KeyCode.F))
+        {
+            StartRewind();
+        }
+        if (Input.GetKeyUp(KeyCode.F))
+        {
+            StopRewind();
         }
     }
 
@@ -156,16 +185,85 @@ public class PlayerController : MonoBehaviour
             Invoke(nameof(InfoCollectibles), 0.1f);
             GameManager.instance.Collectibles -= 1;
         }
+
+        if (collision.gameObject.tag == "Enemies")
+        {
+            Destroy(collision.gameObject);
+            Invoke(nameof(InfoEnemies), 0.1f);
+            GameManager.instance.Enemies -= 1;
+        }
+
+        // The PowerUp increase the player's jump force
+        if (collision.gameObject.tag == "PowerUp")
+        {
+            Destroy(collision.gameObject);
+            jumpForce += 4;
+        }
+
+        // This is a new mechanic
+        if (collision.gameObject.tag == "Heaven")
+        {
+            intoTheHell = false;
+        }
+        
+        if (collision.gameObject.tag == "Hell")
+        {
+            intoTheHell = true;
+        }
     }
 
     private void InfoCollectibles()
     {
         int collectiblesNum = GameObject.FindGameObjectsWithTag("Collectibles").Length;
         hud.SetCollectiblesTxt(collectiblesNum);
+    }
 
-        if (collectiblesNum == 0)
+    private void InfoEnemies()
+    {
+        int enemiesNum = GameObject.FindGameObjectsWithTag("Enemies").Length;
+        hud.SetEnemiesTxt(enemiesNum);
+    }
+
+    public void TakeDamage(int damage)
+    {
+        lives -= damage;
+        hud.SetLivesTxt(lives);
+        StartCoroutine(Damaged());
+
+        if (lives == 0)
         {
-
+            hud.SetLivesTxt(lives);
+            GameManager.instance.PauseGame();
+            hud.SetLoseLivesBox();
         }
+    }
+
+    IEnumerator Damaged()
+    {
+        sprite.color = new Color(255, 0, 0, 1);
+        yield return new WaitForSeconds(0.5f);
+        sprite.color = new Color(255, 255, 255, 1);
+    }
+
+    // New mechanic
+    private void StartRewind()
+    {
+        isRewinding = true;
+    }
+
+    private void StopRewind()
+    {
+        isRewinding = false;
+    }
+
+    private void Rewind()
+    {
+        transform.position = positions[0];
+        positions.RemoveAt(0);
+    }
+
+    private void Record()
+    {
+        positions.Insert(0, transform.position);
     }
 }

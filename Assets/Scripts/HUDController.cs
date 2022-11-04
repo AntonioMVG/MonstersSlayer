@@ -8,6 +8,7 @@ public class HUDController : MonoBehaviour
     public Canvas canvas;
     public TextMeshProUGUI livesTxt;
     public TextMeshProUGUI collectiblesTxt;
+    public TextMeshProUGUI enemiesTxt;
     public TextMeshProUGUI timeTxt;
 
     public void SetTimeTxt(int levelTime)
@@ -25,6 +26,11 @@ public class HUDController : MonoBehaviour
     public void SetCollectiblesTxt(int collectibles)
     {
         collectiblesTxt.text = "Acorns: " + collectibles.ToString();
+    }
+
+    public void SetEnemiesTxt(int enemies)
+    {
+        enemiesTxt.text = "Enemies: " + enemies.ToString();
     }
 
     public void SetTimesUpBox()

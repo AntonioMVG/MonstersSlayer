@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Ground
   - Collectibles
+  - Enemies
+  - PowerUp
+  - Hell
   layers:
   - Default
   - TransparentFX
