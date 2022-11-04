@@ -28,6 +28,8 @@ public class PlayerController : MonoBehaviour
     private bool intoTheHeaven = false;
     private bool intoTheHell;
     private bool isDamaged;
+    private bool enemiesDone;
+    private bool collectiblesDone;
     #endregion
 
     #region Go Back In Time
@@ -69,7 +71,7 @@ public class PlayerController : MonoBehaviour
         // Calculate if the time is finnish
         if (levelTime <= 0f)
         {
-            //WinLevel(false);
+            WinLevel(false);
             GameManager.instance.PauseGame();
             hud.SetTimesUpBox();
         }
@@ -77,6 +79,11 @@ public class PlayerController : MonoBehaviour
         {
             levelTime -= Time.deltaTime;
             hud.SetTimeTxt((int)levelTime);
+        }
+
+        if (enemiesDone == true && collectiblesDone == true  && levelTime >=0 && lives >= 1)
+        {
+            WinLevel(true);
         }
 
         // Go Back In Time
@@ -118,15 +125,15 @@ public class PlayerController : MonoBehaviour
             sneaking = false;
         }
 
-        // Player animations
-        PlayerAnimate();
-
         // Count how many steps the character takes according to its direction
         if ((Input.GetKeyUp(KeyCode.RightArrow)) || (Input.GetKeyUp(KeyCode.LeftArrow)))
         {
             updatedPosX = transform.position.x;
             initialPosX = updatedPosX;
         }
+
+        // Player animations
+        PlayerAnimate();
 
         // When Hell is activated and the F key has been pressed, the game goes back in time
         if (intoTheHell == true && Input.GetKeyDown(KeyCode.F))
@@ -157,32 +164,33 @@ public class PlayerController : MonoBehaviour
     private void PlayerAnimate()
     {
         // Player Jumping
-        if (!TouchGround())
+        if (!TouchGround() && !isDamaged)
         {
             playerAnimation.Play("playerJump");
         }
         // Player Running
-        else if (TouchGround() && Input.GetAxisRaw("Horizontal") != 0)
+        else if (TouchGround() && Input.GetAxisRaw("Horizontal") != 0 && !isDamaged)
         {
             playerAnimation.Play("playerRun");
         }
         // Player Idle
-        else if (TouchGround() && Input.GetAxisRaw("Horizontal") == 0 && !sneaking)
+        else if (TouchGround() && Input.GetAxisRaw("Horizontal") == 0 && !sneaking && !isDamaged)
         {
             sneaking = false;
             playerAnimation.Play("playerIdle");
         }
-        // Player Hurt
-        else if (isDamaged == true)
-        {
-            playerAnimation.Play("playerHurt");
-            isDamaged = false;
-        }
         // Player Crouch
-        else if (TouchGround() && Input.GetKeyDown(KeyCode.S))
+        else if (TouchGround() && Input.GetKeyDown(KeyCode.S) && !isDamaged)
         {
             sneaking = true;
             playerAnimation.Play("playerCrouch");
+        }
+        // Player Hurt
+        else if (TouchGround() && isDamaged == true)
+        {
+            //playerAnimation.Play("playerHurt");
+            StartCoroutine(Damaged());
+            isDamaged = false;
         }
     }
 
@@ -197,9 +205,9 @@ public class PlayerController : MonoBehaviour
 
         if (collision.gameObject.tag == "Enemies")
         {
+            isDamaged = true;
             Destroy(collision.gameObject);
             Invoke(nameof(InfoEnemies), 0.1f);
-            isDamaged = true;
             GameManager.instance.Enemies -= 1;
         }
 
@@ -228,12 +236,30 @@ public class PlayerController : MonoBehaviour
     {
         int collectiblesNum = GameObject.FindGameObjectsWithTag("Collectibles").Length;
         hud.SetCollectiblesTxt(collectiblesNum);
+
+        if(collectiblesNum == 0)
+        {
+            collectiblesDone = true;
+        }
+        else
+        {
+            collectiblesDone = false;
+        }
     }
 
     private void InfoEnemies()
     {
         int enemiesNum = GameObject.FindGameObjectsWithTag("Enemies").Length;
         hud.SetEnemiesTxt(enemiesNum);
+
+        if (enemiesNum == 0)
+        {
+            enemiesDone = true;
+        }
+        else
+        {
+            enemiesDone = false;
+        }
     }
 
     public void TakeDamage(int damage)
@@ -252,9 +278,16 @@ public class PlayerController : MonoBehaviour
 
     IEnumerator Damaged()
     {
+        playerAnimation.Play("playerHurt");
         sprite.color = new Color(255, 0, 0, 1);
         yield return new WaitForSeconds(0.5f);
         sprite.color = new Color(255, 255, 255, 1);
+    }
+
+    private void WinLevel(bool win)
+    {
+        GameManager.instance.Win = win;
+        GameManager.instance.Score = (lives * 1000) + ((int)levelTime * 100);
     }
 
     #region Go Back In Time mechanic

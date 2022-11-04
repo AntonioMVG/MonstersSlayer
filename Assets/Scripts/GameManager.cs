@@ -11,9 +11,13 @@ public class GameManager : MonoBehaviour
     
     private int collectibles;
     private int enemies;
-    
+    private int score;
+    private bool win;
+
     public int Collectibles { get => collectibles; set => collectibles = value; }
     public int Enemies { get => enemies; set => enemies = value; }
+    public int Score { get => score; set => score = value; }
+    public bool Win { get => win; set => win = value; }
 
     private void Awake()
     {
