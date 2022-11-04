@@ -25,11 +25,14 @@ public class PlayerController : MonoBehaviour
     private bool sneaking;
     private float initialPosX;
     private float updatedPosX;
+    private bool intoTheHeaven = false;
     private bool intoTheHell;
+    private bool isDamaged;
+    #endregion
 
-    // New mechanic
+    #region Go Back In Time
     private bool isRewinding;
-    List<Vector3> positions;
+    public List<Vector3> positions;
     #endregion
 
     private void Start()
@@ -51,7 +54,7 @@ public class PlayerController : MonoBehaviour
         hud.SetCollectiblesTxt(GameObject.FindGameObjectsWithTag("Collectibles").Length);
         hud.SetEnemiesTxt(GameObject.FindGameObjectsWithTag("Enemies").Length);
 
-        // New mechanic
+        // Save all positions from Heaven to Hell to Go Back In Time
         positions = new List<Vector3>();
     }
 
@@ -76,7 +79,7 @@ public class PlayerController : MonoBehaviour
             hud.SetTimeTxt((int)levelTime);
         }
 
-        // New mechanic
+        // Go Back In Time
         if (isRewinding)
         {
             Rewind();
@@ -169,6 +172,12 @@ public class PlayerController : MonoBehaviour
             sneaking = false;
             playerAnimation.Play("playerIdle");
         }
+        // Player Hurt
+        else if (isDamaged == true)
+        {
+            playerAnimation.Play("playerHurt");
+            isDamaged = false;
+        }
         // Player Crouch
         else if (TouchGround() && Input.GetKeyDown(KeyCode.S))
         {
@@ -190,6 +199,7 @@ public class PlayerController : MonoBehaviour
         {
             Destroy(collision.gameObject);
             Invoke(nameof(InfoEnemies), 0.1f);
+            isDamaged = true;
             GameManager.instance.Enemies -= 1;
         }
 
@@ -203,11 +213,13 @@ public class PlayerController : MonoBehaviour
         // This is a new mechanic
         if (collision.gameObject.tag == "Heaven")
         {
+            intoTheHeaven = true;
             intoTheHell = false;
         }
         
         if (collision.gameObject.tag == "Hell")
         {
+            intoTheHeaven = false;
             intoTheHell = true;
         }
     }
@@ -245,7 +257,7 @@ public class PlayerController : MonoBehaviour
         sprite.color = new Color(255, 255, 255, 1);
     }
 
-    // New mechanic
+    #region Go Back In Time mechanic
     private void StartRewind()
     {
         isRewinding = true;
@@ -266,4 +278,5 @@ public class PlayerController : MonoBehaviour
     {
         positions.Insert(0, transform.position);
     }
+    #endregion
 }
