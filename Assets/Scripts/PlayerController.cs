@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -30,6 +31,7 @@ public class PlayerController : MonoBehaviour
     private bool isDamaged;
     private bool enemiesDone;
     private bool collectiblesDone;
+    private string levelName;
     #endregion
 
     #region Go Back In Time
@@ -39,6 +41,7 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
+        levelName = SceneManager.GetActiveScene().name;
         GameManager.instance.ResumeGame();
         rb = GetComponent<Rigidbody2D>();
         foot = transform.Find("Foot").gameObject;
@@ -81,7 +84,7 @@ public class PlayerController : MonoBehaviour
             hud.SetTimeTxt((int)levelTime);
         }
 
-        if (enemiesDone == true && collectiblesDone == true  && levelTime >=0 && lives >= 1)
+        if (enemiesDone == true && collectiblesDone == true  && levelTime >= 0f && lives >= 1)
         {
             WinLevel(true);
         }
@@ -91,9 +94,17 @@ public class PlayerController : MonoBehaviour
         {
             Rewind();
         }
-        else
+        else if(intoTheHeaven)
         {
-            Record();
+            if (positions[0] != transform.position)
+            {
+                Record();
+            }
+            else
+            {
+                Record();
+            }
+            
         }
     }
 
@@ -286,8 +297,24 @@ public class PlayerController : MonoBehaviour
 
     private void WinLevel(bool win)
     {
+        GameManager.instance.PauseGame();
+        hud.SetWinBox();
         GameManager.instance.Win = win;
         GameManager.instance.Score = (lives * 1000) + ((int)levelTime * 100);
+        StartCoroutine(WaitingTime(2));
+        if (levelName == "Level01")
+        {
+            GameManager.instance.LoadScene("Level02");
+        }
+        else if (levelName == "Level02")
+        {
+            GameManager.instance.LoadScene("MainMenu");
+        }
+    }
+
+    IEnumerator WaitingTime(float time)
+    {
+        yield return new WaitForSeconds(time);
     }
 
     #region Go Back In Time mechanic

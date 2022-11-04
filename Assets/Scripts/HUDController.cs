@@ -41,13 +41,13 @@ public class HUDController : MonoBehaviour
 
     public void SetWinBox()
     {
-        canvas.transform.Find("WinBox").gameObject.SetActive(true);
+        canvas.transform.Find("WinPanel").gameObject.SetActive(true);
     }
 
     public void SetLoseLivesBox()
     {
         canvas.transform.Find("Panel").gameObject.SetActive(false);
         canvas.transform.Find("TimesUpPanel").gameObject.SetActive(false);
-        canvas.transform.Find("LoseLivesPanel").gameObject.SetActive(true);
+        canvas.transform.Find("LosePanel").gameObject.SetActive(true);
     }
 }
