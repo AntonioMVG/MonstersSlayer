@@ -26,7 +26,7 @@ public class PlayerController : MonoBehaviour
     private bool sneaking;
     private float initialPosX;
     private float updatedPosX;
-    private bool intoTheHeaven = false;
+    private bool intoTheHeaven;
     private bool intoTheHell;
     private bool isDamaged;
     private bool enemiesDone;
@@ -37,6 +37,7 @@ public class PlayerController : MonoBehaviour
     #region Go Back In Time
     private bool isRewinding;
     public List<Vector3> positions;
+    private Vector3 savePosition;
     #endregion
 
     private void Start()
@@ -61,6 +62,7 @@ public class PlayerController : MonoBehaviour
 
         // Save all positions from Heaven to Hell to Go Back In Time
         positions = new List<Vector3>();
+        savePosition = new Vector2(33.08996f, 5.118501f);
     }
 
     private void FixedUpdate()
@@ -96,6 +98,7 @@ public class PlayerController : MonoBehaviour
         }
         else if(intoTheHeaven)
         {
+            Record();
             if (positions[0] != transform.position)
             {
                 Record();
@@ -104,7 +107,6 @@ public class PlayerController : MonoBehaviour
             {
                 Record();
             }
-            
         }
     }
 
@@ -154,6 +156,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.F))
         {
             StopRewind();
+            transform.position = savePosition;
         }
     }
 
@@ -281,6 +284,7 @@ public class PlayerController : MonoBehaviour
 
         if (lives == 0)
         {
+            WinLevel(false);
             hud.SetLivesTxt(lives);
             GameManager.instance.PauseGame();
             hud.SetLoseLivesBox();
@@ -301,7 +305,12 @@ public class PlayerController : MonoBehaviour
         hud.SetWinBox();
         GameManager.instance.Win = win;
         GameManager.instance.Score = (lives * 1000) + ((int)levelTime * 100);
-        StartCoroutine(WaitingTime(2));
+        StartCoroutine(WaitingTime(3));
+    }
+
+    IEnumerator WaitingTime(float time)
+    {
+        yield return new WaitForSecondsRealtime(time);
         if (levelName == "Level01")
         {
             GameManager.instance.LoadScene("Level02");
@@ -310,11 +319,6 @@ public class PlayerController : MonoBehaviour
         {
             GameManager.instance.LoadScene("MainMenu");
         }
-    }
-
-    IEnumerator WaitingTime(float time)
-    {
-        yield return new WaitForSeconds(time);
     }
 
     #region Go Back In Time mechanic

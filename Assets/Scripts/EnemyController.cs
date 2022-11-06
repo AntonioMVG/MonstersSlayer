@@ -23,7 +23,15 @@ public class EnemyController : MonoBehaviour
         movingToEnd = true;
         if (gameObject.name == "Enemies")
         {
-            sprite = gameObject.transform.Find("ant-1").GetComponent<SpriteRenderer>();
+            if(gameObject.name == "ant-1")
+            {
+                sprite = gameObject.transform.Find("ant-1").GetComponent<SpriteRenderer>();
+            }
+            else if (gameObject.name == "gator-1")
+            {
+                sprite = gameObject.transform.Find("gator-1").GetComponent<SpriteRenderer>();
+            }
+            
         }
 
         // Moving to right

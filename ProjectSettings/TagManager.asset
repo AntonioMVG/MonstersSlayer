@@ -9,6 +9,8 @@ TagManager:
   - Enemies
   - PowerUp
   - Hell
+  - Heaven
+  - Limbo
   layers:
   - Default
   - TransparentFX
