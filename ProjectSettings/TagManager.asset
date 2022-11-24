@@ -10,7 +10,8 @@ TagManager:
   - PowerUp
   - Hell
   - Heaven
-  - Limbo
+  - DeadZone
+  - StartZone
   layers:
   - Default
   - TransparentFX

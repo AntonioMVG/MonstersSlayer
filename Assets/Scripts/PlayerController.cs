@@ -5,15 +5,6 @@ using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
-    #region Public variables
-    public int speed;
-    public int jumpForce;
-    public int lives;
-    public float levelTime; // In seconds
-    public Canvas canvas;
-    #endregion
-
-    #region Private variables
     private Rigidbody2D rb;
     private GameObject foot;
     private SpriteRenderer sprite;
@@ -32,13 +23,21 @@ public class PlayerController : MonoBehaviour
     private bool enemiesDone;
     private bool collectiblesDone;
     private string levelName;
-    #endregion
 
-    #region Go Back In Time
+    [Header("Player Data")]
+    public int speed;
+    public int jumpForce;
+    public int lives;
+    public float levelTime; // In seconds
+    public Canvas canvas;
+
+    [Header("Go Back In Time")]
     private bool isRewinding;
-    public List<Vector3> positions;
     private Vector3 savePosition;
-    #endregion
+    public Vector3 startZone;
+    public GameObject deadZone;
+    public List<Vector3> positions;
+    
 
     private void Start()
     {
@@ -210,6 +209,16 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (collision.gameObject.tag == "StartZone")
+        {
+            startZone = transform.position;
+        }
+
+        if (collision.gameObject.tag == "DeadZone")
+        {
+            transform.position = startZone;
+        }
+
         if (collision.gameObject.tag == "Collectibles")
         {
             Destroy(collision.gameObject);
